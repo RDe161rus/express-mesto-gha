@@ -14,6 +14,14 @@ const app = express();
 const { PORT = 3000 } = process.env;
 app.use(express.json());
 
+//МИДЛВЭР
+app.use((req, res, next) => {
+  req.user = {
+    _id: '653a44daaed343abc85e27f9' // вставьте сюда _id созданного в предыдущем пункте пользователя
+  };
+
+  next();
+}); 
 //ROUTER
 app.use(appRouter);
 

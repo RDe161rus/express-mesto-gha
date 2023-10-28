@@ -1,5 +1,29 @@
-/* name — строка от 2 до 30 символов, обязательное поле;
-link — строка, обязательное поле;
-owner — ObjectId, обязательное поле;
-likes — массив ObjectId, по умолчанию пустой;
-createdAt — дата создания, по умолчанию Date.now . */
+/* eslint-disable no-undef */
+const mongoose = require("mongoose");
+
+const cardSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    minlength: 2,
+    maxlength: 30,
+  },
+  link: {
+    type: String,
+    required: true,
+  },
+  owner: {
+    type: Object,
+    required: true,
+  },
+  likes: [{
+    type: Object,
+    default: [],
+  }],
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  }
+});
+
+module.exports = mongoose.model("card", cardSchema);
