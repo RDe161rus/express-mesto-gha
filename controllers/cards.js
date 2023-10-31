@@ -3,10 +3,14 @@ const CardModel = require("../models/card");
 const getCards = (req, res) => {
   return CardModel.find()
   .then((data) => {
-    return res.status(200).send(data);
+    return res.send(data);
   })
   .catch((err) => {
-    return res.status(500).send({ message: "Server Error" }); 
+    if (err.name === 'ValidationError') {
+      res.status(400).send({message: "Переданы некорректные данные"})
+    } else {
+      res.status(500).send({message: "Произошла ошибка на сервере"})
+    }
   })
 };
 //создаёт карты
@@ -18,24 +22,27 @@ const createCard = (req, res) => {
       return res.status(201).send(data);
     })
     .catch((err) => {
-      if (err.name === "ValidationError") {
-        return res.status(400).send({ message: err.message });
+      if (err.name === 'ValidationError') {
+        res.status(400).send({message: "Переданы некорректные данные"})
+      } else {
+        res.status(500).send({message: "Произошла ошибка на сервере"})
       }
-      return res.status(500).send({ message: "Server Error" });
-    });
+    })
 };
 //удаление карточки по ID
 const deleteCardById = (req, res) => {
   return CardModel.findByIdAndDelete(req.params.cardId)
-  .then((data) => {
-    return res.status(201).send(data);
-  })
-  .catch((err) => {
-    if (err.name === "ValidationError") {
-      return res.status(400).send({ message: err.message });
-    }
-    return res.status(500).send({ message: "Server Error" });
-  });
+  .orFail(() => new Error('NotFoundError'))
+    .then((card) => res.send(card))
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(400).send({ message: 'Переданы некорректные данные' })
+      } else if (err.message === 'NotFoundError') {
+        res.status(404).send({ message: 'Пользователь не найден' })
+      } else {
+        res.status(500).send({ message: 'Произошла ошибка на сервере' })
+      }
+    })
 };
 //лайк карточки
 const addCardLike = (req, res) => {
@@ -44,13 +51,19 @@ const addCardLike = (req, res) => {
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
-  .then((data) => {
-    return res.status(201).send(data);
-  })
-  .catch((err) => {
-    
-    return res.status(400).send({ message: "Server Error" });
-  });
+  .orFail(() => new Error('NotFoundError'))
+    .then((card) => {
+      res.send(card)
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(400).send({ message: 'Переданы некорректные данные' })
+      } else if (err.message === 'NotFoundError') {
+        res.status(404).send({ message: 'Пользователь не найден' })
+      } else {
+        res.status(500).send({ message: 'Произошла ошибка на сервере' })
+      }
+    })
 };
 //удаление лайка
 const deleteCardLike = (req, res) => {
@@ -59,13 +72,19 @@ const deleteCardLike = (req, res) => {
     { $pull: { likes: req.user._id } }, 
     { new: true },
   )
-  .then((data) => {
-    return res.status(201).send(data);
+  .orFail(() => new Error('NotFoundError'))
+  .then((card) => {
+    res.send(card)
   })
   .catch((err) => {
-    
-    return res.status(400).send({ message: "Server Error" });
-  });
+    if (err.name === 'CastError') {
+      res.status(400).send({ message: 'Переданы некорректные данные' })
+    } else if (err.message === 'NotFoundError') {
+      res.status(404).send({ message: 'Пользователь не найден' })
+    } else {
+      res.status(500).send({ message: 'Произошла ошибка на сервере' })
+    }
+  })
 };
 
 module.exports = {
