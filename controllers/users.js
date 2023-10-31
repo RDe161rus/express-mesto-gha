@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 const UserModel = require("../models/user");
 
-
+//создаёт пользователя
 const createUser = (req, res) => {
   const userData = req.body;
   return UserModel.create(userData)
@@ -15,8 +15,7 @@ const createUser = (req, res) => {
       return res.status(500).send({ message: "Server Error" });
     });
 };
-///////
-
+//возвращает всех пользователей
 const getUsers = (req, res) => {
   return UserModel.find()
     .then((users) => {
@@ -26,8 +25,7 @@ const getUsers = (req, res) => {
       return res.status(500).send({ message: "Server Error" });
     });
 };
-
-//////
+//возвращает пользователя по _id
 const getUsersById = (req, res) => {
   const { userId } = req.params;
   return UserModel.findById(userId)
@@ -41,17 +39,22 @@ const getUsersById = (req, res) => {
       if (err.name === "CastError") {
         return res.status(400).send({ message: "Invalid ID" });
       }
-
       return res.status(500).send({ message: "Server Error" });
     });
 };
-
-
+//обнавление пользователя
 const updateUserById = (req, res) => {
+
+
+
   return res.status(500).send({ message: "Server Error" });
 }
+//обнавление аватара
+const updateUserAvatar = (req, res) => {
 
-const deleteUserById = (req, res) => {
+
+
+  
   return res.status(500).send({ message: "Server Error" });
 }
 
@@ -61,7 +64,7 @@ module.exports = {
   getUsers,
   getUsersById,
   updateUserById,
-  deleteUserById,
+  updateUserAvatar,
 }
 
 

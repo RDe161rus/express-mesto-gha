@@ -1,18 +1,20 @@
 const CardModel = require("../models/card");
-
+//возвращает все карты
 const getCards = (req, res) => {
-  return CardModel.find()
-    .then((users) => {
-      return res.status(201).send(users);
-    })
-    .catch(() => {
-      return res.status(500).send({ message: "Server Error" });
-    });
-};
-
-const createCard = (req, res) => {
   const cardData = req.body;
-  return CardModel.create(cardData)
+  return CardModel.find(cardData)
+  .then((data) => {
+    return res.status(201).send(data);
+  })
+  .catch((err) => {
+    return res.status(500).send({ message: "Server Error" }); 
+  })
+};
+//создаёт карты
+const createCard = (req, res) => {
+  const {name, link} = req.body;
+  const owner = req.user._id;
+  return CardModel.create({name, link, owner})
     .then((data) => {
       return res.status(201).send(data);
     })
@@ -23,15 +25,15 @@ const createCard = (req, res) => {
       return res.status(500).send({ message: "Server Error" });
     });
 };
-
+//удаление карточки по ID
 const deleteCardById = (req, res) => {
   return res.status(500).send({ message: "Server Error" });
 };
-
+//лайк карточки
 const addCardLike = (req, res) => {
   return res.status(500).send({ message: "Server Error" });
 };
-
+//удаление лайка
 const deleteCardLike = (req, res) => {
   return res.status(500).send({ message: "Server Error" });
 };
@@ -43,15 +45,3 @@ module.exports = {
   addCardLike,
   deleteCardLike,
 };
-
-
-
-
-
-/* GET /cards — возвращает все карточки из базы;
-POST /cards — создаёт карточку с переданными в теле запроса name и link , устанавливает поле owner для
-карточки;
-DELETE /cards/:cardId — удаляет карточку по _id ;
-PUT /cards/:cardId/likes — ставит лайк карточке;
-DELETE /cards/:cardId/likes — убирает лайк с карточки.
- */

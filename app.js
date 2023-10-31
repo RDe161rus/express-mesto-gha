@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 const express = require("express");
-const appRouter = require('./routes')
+const appRouter = require("./routes");
 const mongoose = require("mongoose");
 mongoose
   .connect("mongodb://127.0.0.1:27017/mestodb", {
@@ -21,10 +21,10 @@ app.use((req, res, next) => {
   };
 
   next();
-}); 
+});
+
 //ROUTER
 app.use(appRouter);
-
 
 /////////////////////////////////////
 app.listen(PORT, () => {

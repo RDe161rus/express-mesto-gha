@@ -13,7 +13,7 @@ const {
 router.get("/", getCards);
 //создаёт пользователя
 router.post("/", createCard);
-//удаление
+//удаление карточки по ID
 router.delete("/:cardId", deleteCardById);
 //лайк карточки
 router.put("/:cardId/likes", addCardLike);

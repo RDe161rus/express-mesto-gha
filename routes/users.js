@@ -6,18 +6,18 @@ const {
   getUsersById,
   getUsers,
   updateUserById,
-  deleteUserById,
+  updateUserAvatar,
 } = require("../controllers/users");
 
 //возвращает всех пользователей
 router.get("/", getUsers);
-//создаёт пользователя
-router.post("/", createUser);
 //возвращает пользователя по _id
 router.get("/:userId", getUsersById);
-//обнавление
-router.patch("/:userId", updateUserById);
-//удаление
-router.delete("/:userId", deleteUserById);
+//создаёт пользователя
+router.post("/", createUser);
+//обновление пользователя 
+router.patch("/me", updateUserById);
+//обновление аватара
+router.patch("/me/avatar", updateUserAvatar);
 
 module.exports = router;
