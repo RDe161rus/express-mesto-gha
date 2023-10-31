@@ -3,7 +3,7 @@ const CardModel = require("../models/card");
 const getCards = (req, res) => {
   return CardModel.find()
   .then((data) => {
-    return res.status(201).send(data);
+    return res.status(200).send(data);
   })
   .catch((err) => {
     return res.status(500).send({ message: "Server Error" }); 
@@ -48,10 +48,8 @@ const addCardLike = (req, res) => {
     return res.status(201).send(data);
   })
   .catch((err) => {
-    if (err.name === "ValidationError") {
-      return res.status(400).send({ message: err.message });
-    }
-    return res.status(500).send({ message: "Server Error" });
+    
+    return res.status(400).send({ message: "Server Error" });
   });
 };
 //удаление лайка
@@ -65,10 +63,8 @@ const deleteCardLike = (req, res) => {
     return res.status(201).send(data);
   })
   .catch((err) => {
-    if (err.name === "ValidationError") {
-      return res.status(400).send({ message: err.message });
-    }
-    return res.status(500).send({ message: "Server Error" });
+    
+    return res.status(400).send({ message: "Server Error" });
   });
 };
 

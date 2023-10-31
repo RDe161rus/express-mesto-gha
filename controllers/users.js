@@ -5,7 +5,7 @@ const UserModel = require("../models/user");
 const getUsers = (req, res) => {
   return UserModel.find()
     .then((users) => {
-      return res.status(201).send(users);
+      return res.status(200).send(users);
     })
     .catch(() => {
       return res.status(500).send({ message: "Server Error" });
@@ -33,7 +33,7 @@ const getUsersById = (req, res) => {
       if (!user) {
         return res.status(404).send({ message: "User not found" });
       }
-      return res.status(201).send(user);
+      return res.status(200).send(user);
     })
     .catch((err) => {
       if (err.name === "CastError") {
