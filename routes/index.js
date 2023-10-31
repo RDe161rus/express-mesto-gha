@@ -15,7 +15,5 @@ router.post("/post", (req, res) => {
 
 router.use('/users', userRouter);
 router.use('/cards', cardRouter);
-router.use('*', (req, res, next) => {
-  next(new NotFoundError('Переданы некорректные данные'));
-});
+
 module.exports = router;

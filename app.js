@@ -25,7 +25,9 @@ app.use((req, res, next) => {
 
 //ROUTER
 app.use(appRouter);
-
+app.use("*", (req, res) => {
+  res.status(404).send({message:'Переданы некорректные данные'})
+})
 /////////////////////////////////////
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
