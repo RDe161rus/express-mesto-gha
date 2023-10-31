@@ -1,8 +1,7 @@
 const CardModel = require("../models/card");
 //возвращает все карты
 const getCards = (req, res) => {
-  const cardData = req.body;
-  return CardModel.find(cardData)
+  return CardModel.find()
   .then((data) => {
     return res.status(201).send(data);
   })
@@ -27,15 +26,50 @@ const createCard = (req, res) => {
 };
 //удаление карточки по ID
 const deleteCardById = (req, res) => {
-  return res.status(500).send({ message: "Server Error" });
+  return CardModel.findByIdAndDelete(req.params.cardId)
+  .then((data) => {
+    return res.status(201).send(data);
+  })
+  .catch((err) => {
+    if (err.name === "ValidationError") {
+      return res.status(400).send({ message: err.message });
+    }
+    return res.status(500).send({ message: "Server Error" });
+  });
 };
 //лайк карточки
 const addCardLike = (req, res) => {
-  return res.status(500).send({ message: "Server Error" });
+  return CardModel.findByIdAndUpdate(
+    req.params.cardId,
+    { $addToSet: { likes: req.user._id } },
+    { new: true },
+  )
+  .then((data) => {
+    return res.status(201).send(data);
+  })
+  .catch((err) => {
+    if (err.name === "ValidationError") {
+      return res.status(400).send({ message: err.message });
+    }
+    return res.status(500).send({ message: "Server Error" });
+  });
 };
 //удаление лайка
 const deleteCardLike = (req, res) => {
-  return res.status(500).send({ message: "Server Error" });
+  CardModel.findByIdAndUpdate(
+    req.params.cardId,
+    { $pull: { likes: req.user._id } }, 
+    { new: true },
+  )
+  .then((data) => {
+    return res.status(201).send(data);
+  })
+  .catch((err) => {
+    if (err.name === "ValidationError") {
+      return res.status(400).send({ message: err.message });
+    }
+    return res.status(500).send({ message: "Server Error" });
+  });
 };
 
 module.exports = {

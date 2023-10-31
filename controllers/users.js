@@ -1,6 +1,16 @@
 /* eslint-disable no-undef */
 const UserModel = require("../models/user");
 
+//возвращает всех пользователей
+const getUsers = (req, res) => {
+  return UserModel.find()
+    .then((users) => {
+      return res.status(201).send(users);
+    })
+    .catch(() => {
+      return res.status(500).send({ message: "Server Error" });
+    });
+};
 //создаёт пользователя
 const createUser = (req, res) => {
   const userData = req.body;
@@ -12,16 +22,6 @@ const createUser = (req, res) => {
       if (err.name === "ValidationError") {
         return res.status(400).send({ message: err.message });
       }
-      return res.status(500).send({ message: "Server Error" });
-    });
-};
-//возвращает всех пользователей
-const getUsers = (req, res) => {
-  return UserModel.find()
-    .then((users) => {
-      return res.status(201).send(users);
-    })
-    .catch(() => {
       return res.status(500).send({ message: "Server Error" });
     });
 };
@@ -44,18 +44,31 @@ const getUsersById = (req, res) => {
 };
 //обнавление пользователя
 const updateUserById = (req, res) => {
-
-
-
-  return res.status(500).send({ message: "Server Error" });
+  const {name, about} = req.body;
+  return UserModel.findByIdAndUpdate(req.user._id, {name, about}, {new: true, runValidators: true})
+  .then((user) => {
+    return res.send(user);
+  })
+  .catch((err) => {
+    if (err.name === "ValidationError") {
+      return res.status(400).send({ message: err.message });
+    }
+    return res.status(500).send({ message: "Server Error" });
+  });
 }
 //обнавление аватара
 const updateUserAvatar = (req, res) => {
-
-
-
-  
-  return res.status(500).send({ message: "Server Error" });
+  const {avatar} = req.body;
+  return UserModel.findByIdAndUpdate(req.user._id, {avatar}, {new: true, runValidators: true})
+  .then((user) => {
+    return res.send(user);
+  })
+  .catch((err) => {
+    if (err.name === "ValidationError") {
+      return res.status(400).send({ message: err.message });
+    }
+    return res.status(500).send({ message: "Server Error" });
+  });
 }
 
 
