@@ -1,28 +1,32 @@
-/* eslint-disable no-undef */
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const cardSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: true,
-      minlength: 2,
-      maxlength: 30,
+      required: [true, 'Поле "name" должно быть заполнено'],
+      minlength: [2, 'Минимальная длина поля "name" - 2'],
+      maxlength: [30, 'Максимальная длина поля "name" - 30'],
     },
     link: {
       type: String,
-      required: true,
+      required: [true, 'Поле "name" должно быть заполнено'],
+      validate: {
+        // eslint-disable-next-line no-undef
+        validator: (v) => validator.isURL(v),
+        message: 'Некорректный URL',
+      },
     },
     owner: {
       type: mongoose.Schema.Types.ObjectId,
-      required: true,
-      ref: "user",
+      required: [true, 'Поле "name" должно быть заполнено'],
+      ref: 'user',
     },
     likes: [
       {
         type: mongoose.Schema.Types.ObjectId,
         default: [],
-        ref: "user",
+        ref: 'user',
       },
     ],
     createdAt: {
@@ -30,7 +34,7 @@ const cardSchema = new mongoose.Schema(
       default: Date.now,
     },
   },
-  { versionKey: false }
+  { versionKey: false },
 );
 
-module.exports = mongoose.model("card", cardSchema);
+module.exports = mongoose.model('card', cardSchema);

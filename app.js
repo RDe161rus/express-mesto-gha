@@ -1,34 +1,29 @@
-/* eslint-disable no-undef */
-const express = require("express");
-const appRouter = require("./routes");
-const mongoose = require("mongoose");
+const express = require('express');
+const mongoose = require('mongoose');
+const appRouter = require('./routes');
+
 mongoose
-  .connect("mongodb://127.0.0.1:27017/mestodb", {
+  .connect('mongodb://127.0.0.1:27017/mestodb', {
     useNewUrlParser: true,
   })
   .then(() => {
-    console.log("Connected to MongoDB");
+    console.log('Connected to MongoDB');
   });
 
 const app = express();
 const { PORT = 3000 } = process.env;
 app.use(express.json());
 
-//МИДЛВЭР
 app.use((req, res, next) => {
   req.user = {
-    _id: '65411f36b66de5f28aac762f' // вставьте сюда _id созданного в предыдущем пункте пользователя
+    _id: '65411f36b66de5f28aac762f',
   };
 
   next();
 });
 
-//ROUTER
 app.use(appRouter);
-app.use("*", (req, res) => {
-  res.status(404).send({message:'Переданы некорректные данные'})
-})
-/////////////////////////////////////
+
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
 });

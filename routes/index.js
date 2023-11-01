@@ -1,17 +1,13 @@
-/* eslint-disable no-undef */
-const router = require("express").Router();
+const router = require('express').Router();
 
-const userRouter = require("./users");
-const cardRouter = require("./cards");
+const userRouter = require('./users');
+const cardRouter = require('./cards');
 
-router.get("/", (req, res) => {
-  res.status(201).send("hello_world");
+router.use('*', (req, res) => {
+  res.status(404).send({
+    message: 'Переданы некорректные данные',
+  });
 });
-router.post("/post", (req, res) => {
-  const { name } = req.body;
-  res.status(201).send(name);
-});
-
 
 router.use('/users', userRouter);
 router.use('/cards', cardRouter);
