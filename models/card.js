@@ -11,11 +11,6 @@ const cardSchema = new mongoose.Schema(
     link: {
       type: String,
       required: [true, 'Поле "name" должно быть заполнено'],
-      validate: {
-        // eslint-disable-next-line no-undef
-        validator: (v) => validator.isURL(v),
-        message: 'Некорректный URL',
-      },
     },
     owner: {
       type: mongoose.Schema.Types.ObjectId,
