@@ -74,11 +74,12 @@ const createUser = (req, res) => {
       });
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(400).send({ message: 'Переданы некорректные данные' });
-      } else {
-        res.status(500).send({ message: 'Произошла ошибка на сервере' });
+      if (err.code === 11000) {
+        res.status(409).send({ message: 'Указанный email уже существует' });
+      } else if (err.name === 'ValidationError') {
+        res.status(401).send({ message: 'Переданы некорректные данные' });
       }
+      res.status(500).send({ message: 'Произошла ошибка на сервере' });
     });
 };
 
