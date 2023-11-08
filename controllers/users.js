@@ -1,3 +1,5 @@
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const UserModel = require('../models/user');
 
 const getUsers = (req, res) => {
@@ -32,12 +34,44 @@ const getUsersById = (req, res) => {
     });
 };
 
-const createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
-  UserModel.create({ name, about, avatar })
+const login = (req, res) => {
+  const { email, password } = req.body;
+
+  return UserModel.findUserByCredentials(email, password)
     .then((user) => {
-      res.send(user);
-      res.status(201).send(user);
+      if (!user) {
+        res.status(409).send({ message: 'Неверная почта или пароль' });
+      }
+      const token = jwt.sign({ _id: user._id }, 'jwt_secret', { expiresIn: '7d' });
+      res.status(201).send({ token });
+    })
+    .catch(() => {
+      res.status(401).send({ message: 'Неверная почта или пароль' });
+    });
+};
+
+const createUser = (req, res) => {
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
+  bcrypt
+    .hash(password, 10)
+    .then((hash) => {
+      UserModel.create({
+        name,
+        about,
+        avatar,
+        email,
+        password: hash,
+      });
+    })
+    .then(() => {
+      res.status(201).send({
+        name,
+        about,
+        avatar,
+        email,
+      });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -47,6 +81,7 @@ const createUser = (req, res) => {
       }
     });
 };
+
 const updateUserById = (req, res) => {
   const { name, about } = req.body;
   UserModel.findByIdAndUpdate(
@@ -89,10 +124,31 @@ const updateUserAvatar = (req, res) => {
       }
     });
 };
+
+const getUserCurrent = (req, res) => {
+  UserModel.findById(req.user._id)
+    .then((user) => {
+      if (!user) {
+        res.status(404).send({ message: 'Пользователь не найден' });
+      }
+      res.send(user);
+    })
+    .catch((err) => {
+      if (err.message === 'NotFoundError') {
+        res.status(404).send({ message: 'Пользователь не найден' });
+      } else if (err.message === 'CastError') {
+        res.status(401).send({ message: 'Переданы некорректные данные' });
+      }
+      res.status(500).send({ message: 'Произошла ошибка на сервере' });
+    });
+};
+
 module.exports = {
+  login,
   createUser,
   getUsers,
   getUsersById,
   updateUserById,
   updateUserAvatar,
+  getUserCurrent,
 };
