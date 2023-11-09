@@ -114,22 +114,23 @@ const getUserCurrent = (req, res) => {
     });
 };
 
-const login = (req, res, next) => {
+const login = (req, res) => {
   const { email, password } = req.body;
 
   return UserModel.findUserByCredentials(email, password)
     .then((user) => {
-      if (!user) {
-        res.status(409).send({ message: 'Неверная почта или пароль' });
-      }
       const token = jwt.sign(
         { _id: user._id },
         NODE_ENV === 'production' ? JWT_SECRET : 'jwt_secret',
         { expiresIn: '7d' },
       );
-      res.status(200).send({ token });
+      res.send({ token });
     })
-    .catch(next);
+    .catch((err) => {
+      if (err) {
+        res.status(401).send({ message: 'Неверная почта или пароль' });
+      }
+    });
 };
 
 module.exports = {
