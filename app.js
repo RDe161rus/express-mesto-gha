@@ -6,6 +6,7 @@ const { errors } = require('celebrate');
 const appRouter = require('./routes');
 
 const { PORT = 3000, DB_URL = 'mongodb://127.0.0.1/mestodb' } = process.env;
+
 const app = express();
 app.use(express.json());
 
