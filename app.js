@@ -1,20 +1,33 @@
 const express = require('express');
+const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 const mongoose = require('mongoose');
+const { errors } = require('celebrate');
 const appRouter = require('./routes');
 
-mongoose
-  .connect('mongodb://127.0.0.1:27017/mestodb', {
-    useNewUrlParser: true,
-  })
-  .then(() => {
-    console.log('Connected to MongoDB');
-  });
-
+const { PORT = 3000, DB_URL = 'mongodb://127.0.0.1/mestodb' } = process.env;
 const app = express();
-const { PORT = 3000 } = process.env;
 app.use(express.json());
 
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser());
+mongoose.connect(DB_URL);
+
 app.use(appRouter);
+app.use(errors());
+app.use((err, req, res, next) => {
+  const { statusCode = 500, message } = err;
+
+  res
+    .status(err.statusCode)
+    .send({
+      message: statusCode === 500
+        ? 'На сервере произошла ошибка'
+        : message,
+    });
+  return next();
+});
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);

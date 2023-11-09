@@ -10,11 +10,11 @@ const cardSchema = new mongoose.Schema(
     },
     link: {
       type: String,
-      required: [true, 'Поле "name" должно быть заполнено'],
+      required: [true, 'Поле "link" должно быть заполнено'],
     },
     owner: {
       type: mongoose.Schema.Types.ObjectId,
-      required: [true, 'Поле "name" должно быть заполнено'],
+      required: [true, 'Поле "owner" должно быть заполнено'],
       ref: 'user',
     },
     likes: [

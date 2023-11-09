@@ -5,25 +5,25 @@ const userSchema = new mongoose.Schema(
   {
     email: {
       type: String,
-      required: [true, 'Поле "name" должно быть заполнено'],
+      required: [true, 'Поле "email" должно быть заполнено'],
       unique: true,
     },
     password: {
       type: String,
-      required: [true, 'Поле "name" должно быть заполнено'],
+      required: [true, 'Поле "password" должно быть заполнено'],
       select: false,
     },
     name: {
       type: String,
+      default: 'Жак-Ив Кусто',
       minlength: [2, 'Минимальная длина поля "name" - 2'],
       maxlength: [30, 'Максимальная длина поля "name" - 30'],
-      default: 'Жак-Ив Кусто',
     },
     about: {
       type: String,
-      minlength: [2, 'Минимальная длина поля "name" - 2'],
-      maxlength: [30, 'Максимальная длина поля "name" - 30'],
       default: 'Исследователь',
+      minlength: [2, 'Минимальная длина поля "about" - 2'],
+      maxlength: [30, 'Максимальная длина поля "about" - 30'],
     },
     avatar: {
       type: String,
@@ -33,8 +33,8 @@ const userSchema = new mongoose.Schema(
   { versionKey: false },
 );
 
-userSchema.statics.findUserByCredentials = function (email, password) {
-  return this.findOne({ email })
+userSchema.statics.findUserByCredentials = function findUser(email, password) {
+  return this.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
         return Promise.reject(new Error('Неправильные почта или пароль'));

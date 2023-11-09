@@ -17,12 +17,14 @@ router.get('/:userId', celebrate({
     userId: Joi.string().alphanum().length(24).hex(),
   }),
 }), getUsersById);
+
 router.patch('/me', celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30).required(),
     about: Joi.string().min(2).max(30).required(),
   }),
 }), updateUserById);
+
 router.patch('/me/avatar', celebrate({
   body: Joi.object().keys({
     avatar: Joi.string().regex(urlValidate),

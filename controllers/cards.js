@@ -1,17 +1,9 @@
 const CardModel = require('../models/card');
 
-const getCards = (req, res) => {
-  CardModel.find()
-    .then((data) => {
-      res.send(data);
-    })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(400).send({ message: 'Переданы некорректные данные' });
-      } else {
-        res.status(500).send({ message: 'Произошла ошибка на сервере' });
-      }
-    });
+const getCards = (req, res, next) => {
+  CardModel.find({})
+    .then((cards) => res.send(cards))
+    .catch(next);
 };
 const createCard = (req, res) => {
   const { name, link } = req.body;
@@ -23,23 +15,29 @@ const createCard = (req, res) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(400).send({ message: 'Переданы некорректные данные' });
-      } else {
-        res.status(500).send({ message: 'Произошла ошибка на сервере' });
       }
+      res.status(500).send({ message: 'Произошла ошибка на сервере' });
     });
 };
-const deleteCardById = (req, res) => {
-  CardModel.findByIdAndDelete(req.params.cardId)
-    .orFail(() => new Error('NotFoundError'))
-    .then((card) => res.send(card))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Переданы некорректные данные' });
-      } else if (err.message === 'NotFoundError') {
+const deleteCardById = (req, res, next) => {
+  CardModel.findById(req.params.cardId)
+    .then((card) => {
+      if (!card) {
         res.status(404).send({ message: 'Пользователь не найден' });
-      } else {
-        res.status(500).send({ message: 'Произошла ошибка на сервере' });
+      } else if (card.owner.toString() !== req.user._id) {
+        res.status(403).send({ message: 'Вы не можете удалить чужую карточку' });
+      } CardModel.findByIdAndDelete(req.params.cardId)
+        .then((deletedCard) => {
+          res.send(deletedCard);
+        });
+    })
+    .catch((err) => {
+      if (err.message === 'NotFoundError') {
+        res.status(404).send({ message: 'Пользователь не найден' });
+      } else if (err.name === 'CastError') {
+        res.status(400).send({ message: 'Переданы некорректные данные' });
       }
+      return next(err);
     });
 };
 const addCardLike = (req, res) => {
@@ -48,18 +46,19 @@ const addCardLike = (req, res) => {
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
-    .orFail(() => new Error('NotFoundError'))
     .then((card) => {
-      res.send(card);
+      if (!card) {
+        res.status(404).send({ message: 'Пользователь не найден' });
+      }
+      return res.send(card);
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Переданы некорректные данные' });
-      } else if (err.message === 'NotFoundError') {
+      if (err.message === 'NotFoundError') {
         res.status(404).send({ message: 'Пользователь не найден' });
-      } else {
-        res.status(500).send({ message: 'Произошла ошибка на сервере' });
+      } else if (err.name === 'CastError') {
+        res.status(400).send({ message: 'Переданы некорректные данные' });
       }
+      res.status(500).send({ message: 'Произошла ошибка на сервере' });
     });
 };
 const deleteCardLike = (req, res) => {
@@ -68,18 +67,19 @@ const deleteCardLike = (req, res) => {
     { $pull: { likes: req.user._id } },
     { new: true },
   )
-    .orFail(() => new Error('NotFoundError'))
     .then((card) => {
-      res.send(card);
+      if (!card) {
+        res.status(404).send({ message: 'Пользователь не найден' });
+      }
+      return res.send(card);
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Переданы некорректные данные' });
-      } else if (err.message === 'NotFoundError') {
+      if (err.message === 'NotFoundError') {
         res.status(404).send({ message: 'Пользователь не найден' });
-      } else {
-        res.status(500).send({ message: 'Произошла ошибка на сервере' });
+      } else if (err.name === 'CastError') {
+        res.status(400).send({ message: 'Переданы некорректные данные' });
       }
+      res.status(500).send({ message: 'Произошла ошибка на сервере' });
     });
 };
 
