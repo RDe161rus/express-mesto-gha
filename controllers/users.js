@@ -1,6 +1,12 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const UserModel = require('../models/user');
+const {
+  ValidationError,
+  ConflictError,
+  NotFoundError,
+  ServerError,
+} = require('../utils/errors');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
@@ -12,109 +18,116 @@ const getUsers = (req, res, next) => {
     .catch(next);
 };
 
-const getUsersById = (req, res) => {
-  const { userId } = req.params;
-  UserModel.findById(userId)
+const getUsersById = (req, res, next) => {
+  UserModel.findById(req.params.userId)
     .then((user) => {
       if (!user) {
-        res.status(404).send({ message: 'Пользователь не найден' });
+        throw new NotFoundError('Пользователь не найден');
       }
       return res.send(user);
     })
     .catch((err) => {
-      if (err.message === 'NotFoundError') {
-        return res.status(404).send({ message: 'Пользователь не найден' });
-      }
       if (err.name === 'CastError') {
-        return res.status(400).send({ message: 'Переданы некорректные данные' });
+        return next(new ValidationError('Переданы некорректные данные'));
       }
-      return res.status(500).send({ message: 'Произошла ошибка на сервере' });
+      return next(new ServerError('Произошла ошибка на сервере'));
     });
 };
 
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
-  bcrypt.hash(password, 10)
+  bcrypt
+    .hash(password, 10)
     .then((hash) => UserModel.create({
-      name, about, avatar, email, password: hash,
+      name,
+      about,
+      avatar,
+      email,
+      password: hash,
     }))
     .then(() => {
       res.status(201).send({
-        name, about, avatar, email,
+        name,
+        about,
+        avatar,
+        email,
       });
     })
     .catch((err) => {
       if (err.code === 11000) {
-        return res.status(409).send({ message: 'Указанный email уже существует' });
+        return next(new ConflictError('Указанный email уже существует'));
       }
       if (err.name === 'ValidationError') {
-        return res.status(401).send({ message: 'Переданы некорректные данные' });
+        return next(new ValidationError('Переданы некорректные данные'));
       }
-      return res.status(500).send({ message: 'Произошла ошибка на сервере' });
+      return next(new ServerError('Произошла ошибка на сервере'));
     });
 };
 
-const updateUserById = (req, res) => {
+const updateUserById = (req, res, next) => {
   const { name, about } = req.body;
-  UserModel.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
+  UserModel.findByIdAndUpdate(
+    req.user._id,
+    { name, about },
+    { new: true, runValidators: true },
+  )
     .then((user) => {
       if (!user) {
-        return res.status(404).send({ message: 'Пользователь не найден' });
+        throw new NotFoundError('Пользователь не найден');
       }
       return res.send(user);
     })
     .catch((err) => {
       if (err.message === 'NotFoundError') {
-        return res.status(404).send({ message: 'Пользователь не найден' });
+        return next(new NotFoundError('Пользователь не найден'));
       }
-      if (err.name === 'CastError') {
-        return res.status(400).send({ message: 'Переданы некорректные данные' });
-      }
-      return res.status(500).send({ message: 'Произошла ошибка на сервере' });
-    });
-};
-const updateUserAvatar = (req, res) => {
-  const { avatar } = req.body;
-  UserModel.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
-    .then((user) => {
-      if (!user) {
-        res.status(404).send({ message: 'Пользователь не найден' });
-      }
-      return res.send(user);
-    })
-    .catch((err) => {
-      if (err.message === 'NotFoundError') {
-        return res.status(404).send({ message: 'Пользователь не найден' });
-      }
-      if (err.name === 'CastError') {
-        return res.status(400).send({ message: 'Переданы некорректные данные' });
-      }
-      return res.status(500).send({ message: 'Произошла ошибка на сервере' });
+      return next(new ServerError('Произошла ошибка на сервере'));
     });
 };
 
-const getUserCurrent = (req, res) => {
+const updateUserAvatar = (req, res, next) => {
+  const { avatar } = req.body;
+  UserModel.findByIdAndUpdate(
+    req.user._id,
+    { avatar },
+    { new: true, runValidators: true },
+  )
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError('Пользователь не найден');
+      }
+      return res.send(user);
+    })
+    .catch((err) => {
+      if (err.message === 'NotFoundError') {
+        return next(new NotFoundError('Пользователь не найден'));
+      }
+      return next(new ServerError('Произошла ошибка на сервере'));
+    });
+};
+
+const getUserCurrent = (req, res, next) => {
   UserModel.findById(req.user._id)
     .then((user) => {
       if (!user) {
-        res.status(404).send({ message: 'Пользователь не найден' });
+        throw new NotFoundError('Пользователь не найден');
       }
-      res.send(user);
+      return res.send(user);
     })
     .catch((err) => {
       if (err.message === 'NotFoundError') {
-        return res.status(404).send({ message: 'Пользователь не найден' });
+        return next(new NotFoundError('Пользователь не найден'));
       }
       if (err.name === 'CastError') {
-        return res.status(400).send({ message: 'Переданы некорректные данные' });
+        return next(new ValidationError('Переданы некорректные данные'));
       }
-      return res.status(500).send({ message: 'Произошла ошибка на сервере' });
+      return next(new ServerError('Произошла ошибка на сервере'));
     });
 };
 
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
 
   return UserModel.findUserByCredentials(email, password)
@@ -126,11 +139,7 @@ const login = (req, res) => {
       );
       res.send({ token });
     })
-    .catch((err) => {
-      if (err) {
-        res.status(401).send({ message: 'Неверная почта или пароль' });
-      }
-    });
+    .catch(next);
 };
 
 module.exports = {

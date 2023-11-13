@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const { celebrate, Joi } = require('celebrate');
 
-const urlValidate = /^https?:\/\/(?:w{3}\.)?(?:[a-z0-9]+[a-z0-9-]*\.)+[a-z]{2,}(?::[0-9]+)?(?:\/\S*)?#?$/i;
+const { urlValidate } = require('../utils/constants');
 const {
   getUsersById,
   getUsers,
@@ -14,7 +14,7 @@ router.get('/', getUsers);
 router.get('/me', getUserCurrent);
 router.get('/:userId', celebrate({
   params: Joi.object().keys({
-    userId: Joi.string().alphanum().length(24).hex(),
+    userId: Joi.string().required().hex().length(24),
   }),
 }), getUsersById);
 
@@ -27,7 +27,7 @@ router.patch('/me', celebrate({
 
 router.patch('/me/avatar', celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string().regex(urlValidate),
+    avatar: Joi.string().required().regex(urlValidate),
   }),
 }), updateUserAvatar);
 

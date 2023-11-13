@@ -1,11 +1,17 @@
 const CardModel = require('../models/card');
+const {
+  ValidationError,
+  ForbiddenError,
+  NotFoundError,
+  ServerError,
+} = require('../utils/errors');
 
 const getCards = (req, res, next) => {
   CardModel.find({})
     .then((cards) => res.send(cards))
     .catch(next);
 };
-const createCard = (req, res) => {
+const createCard = (req, res, next) => {
   const { name, link } = req.body;
   const owner = req.user._id;
   CardModel.create({ name, link, owner })
@@ -14,33 +20,34 @@ const createCard = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({ message: 'Переданы некорректные данные' });
+        return next(new ValidationError('Переданы некорректные данные'));
       }
-      res.status(500).send({ message: 'Произошла ошибка на сервере' });
+      return next(new ServerError('Произошла ошибка на сервере'));
     });
 };
 const deleteCardById = (req, res, next) => {
   CardModel.findById(req.params.cardId)
     .then((card) => {
       if (!card) {
-        res.status(404).send({ message: 'Пользователь не найден' });
+        throw new NotFoundError('Пользователь не найден');
       } else if (card.owner.toString() !== req.user._id) {
-        res.status(403).send({ message: 'Вы не можете удалить чужую карточку' });
-      } CardModel.findByIdAndDelete(req.params.cardId)
-        .then((deletedCard) => {
-          res.send(deletedCard);
-        });
+        throw new ForbiddenError('Вы не можете удалить чужую карточку');
+      }
+      CardModel.findByIdAndDelete(req.params.cardId).then((deletedCard) => {
+        res.send(deletedCard);
+      });
     })
     .catch((err) => {
       if (err.message === 'NotFoundError') {
-        res.status(404).send({ message: 'Пользователь не найден' });
-      } else if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Переданы некорректные данные' });
+        return next(new NotFoundError('Пользователь не найден'));
+      }
+      if (err.name === 'CastError') {
+        return next(new ValidationError('Переданы некорректные данные'));
       }
       return next(err);
     });
 };
-const addCardLike = (req, res) => {
+const addCardLike = (req, res, next) => {
   CardModel.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
@@ -48,20 +55,22 @@ const addCardLike = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        res.status(404).send({ message: 'Пользователь не найден' });
+        throw new NotFoundError('Пользователь не найден');
       }
       return res.send(card);
     })
     .catch((err) => {
       if (err.message === 'NotFoundError') {
-        res.status(404).send({ message: 'Пользователь не найден' });
-      } else if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Переданы некорректные данные' });
+        return next(new NotFoundError('Пользователь не найден'));
       }
-      res.status(500).send({ message: 'Произошла ошибка на сервере' });
+      if (err.name === 'CastError') {
+        return next(new ValidationError('Переданы некорректные данные'));
+      }
+      return next(new ServerError('Произошла ошибка на сервере'));
     });
 };
-const deleteCardLike = (req, res) => {
+
+const deleteCardLike = (req, res, next) => {
   CardModel.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } },
@@ -69,17 +78,18 @@ const deleteCardLike = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        res.status(404).send({ message: 'Пользователь не найден' });
+        throw new NotFoundError('Пользователь не найден');
       }
       return res.send(card);
     })
     .catch((err) => {
       if (err.message === 'NotFoundError') {
-        res.status(404).send({ message: 'Пользователь не найден' });
-      } else if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Переданы некорректные данные' });
+        return next(new NotFoundError('Пользователь не найден'));
       }
-      res.status(500).send({ message: 'Произошла ошибка на сервере' });
+      if (err.name === 'CastError') {
+        return next(new ValidationError('Переданы некорректные данные'));
+      }
+      return next(new ServerError('Произошла ошибка на сервере'));
     });
 };
 

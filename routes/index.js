@@ -5,7 +5,8 @@ const cardRouter = require('./cards');
 const { login, createUser } = require('../controllers/users');
 const auth = require('../middlewares/auth');
 
-const urlValidate = /^https?:\/\/(?:w{3}\.)?(?:[a-z0-9]+[a-z0-9-]*\.)+[a-z]{2,}(?::[0-9]+)?(?:\/\S*)?#?$/i;
+const { urlValidate } = require('../utils/constants');
+const NotFoundError = require('../utils/errors/NotFoundError');
 
 router.post('/signin', celebrate({
   body: Joi.object().keys({
@@ -26,10 +27,10 @@ router.post('/signup', celebrate({
 
 router.use('/users', auth, userRouter);
 router.use('/cards', auth, cardRouter);
-router.use('*', (req, res) => {
-  res.status(404).send({
-    message: 'Переданы некорректные данные',
-  });
+router.use('/*', (req, res, next) => {
+  next(new NotFoundError('Такой страницы не существует'));
+
+  return next();
 });
 
 module.exports = router;
