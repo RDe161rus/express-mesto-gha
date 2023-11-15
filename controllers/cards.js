@@ -63,9 +63,6 @@ const addCardLike = (req, res, next) => {
       if (err.message === 'NotFoundError') {
         return next(new NotFoundError('Пользователь не найден'));
       }
-      if (err.name === 'CastError') {
-        return next(new ValidationError('Переданы некорректные данные'));
-      }
       return next(new ServerError('Произошла ошибка на сервере'));
     });
 };
@@ -85,9 +82,6 @@ const deleteCardLike = (req, res, next) => {
     .catch((err) => {
       if (err.message === 'NotFoundError') {
         return next(new NotFoundError('Пользователь не найден'));
-      }
-      if (err.name === 'CastError') {
-        return next(new ValidationError('Переданы некорректные данные'));
       }
       return next(new ServerError('Произошла ошибка на сервере'));
     });
