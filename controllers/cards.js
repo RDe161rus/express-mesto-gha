@@ -59,10 +59,7 @@ const addCardLike = (req, res, next) => {
       }
       return res.send(card);
     })
-    .catch((err) => {
-      if (err.message === 'NotFoundError') {
-        return next(new NotFoundError('Пользователь не найден'));
-      }
+    .catch(() => {
       return next(new ServerError('Произошла ошибка на сервере'));
     });
 };
@@ -79,10 +76,7 @@ const deleteCardLike = (req, res, next) => {
       }
       return res.send(card);
     })
-    .catch((err) => {
-      if (err.message === 'NotFoundError') {
-        return next(new NotFoundError('Пользователь не найден'));
-      }
+    .catch(() => {
       return next(new ServerError('Произошла ошибка на сервере'));
     });
 };
