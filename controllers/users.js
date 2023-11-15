@@ -26,12 +26,7 @@ const getUsersById = (req, res, next) => {
       }
       return res.send(user);
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        return next(new ValidationError('Переданы некорректные данные'));
-      }
-      return next(new ServerError('Произошла ошибка на сервере'));
-    });
+    .catch(next);
 };
 
 const createUser = (req, res, next) => {
