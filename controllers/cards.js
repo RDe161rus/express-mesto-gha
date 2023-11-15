@@ -59,9 +59,7 @@ const addCardLike = (req, res, next) => {
       }
       return res.send(card);
     })
-    .catch(() => {
-      return next(new ServerError('Произошла ошибка на сервере'));
-    });
+    .catch(next);
 };
 
 const deleteCardLike = (req, res, next) => {
@@ -76,9 +74,7 @@ const deleteCardLike = (req, res, next) => {
       }
       return res.send(card);
     })
-    .catch(() => {
-      return next(new ServerError('Произошла ошибка на сервере'));
-    });
+    .catch(next);
 };
 
 module.exports = {
