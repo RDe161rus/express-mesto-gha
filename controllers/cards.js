@@ -3,7 +3,6 @@ const {
   ValidationError,
   ForbiddenError,
   NotFoundError,
-  ServerError,
 } = require('../utils/errors');
 
 const getCards = (req, res, next) => {
@@ -22,7 +21,7 @@ const createCard = (req, res, next) => {
       if (err.name === 'ValidationError') {
         return next(new ValidationError('Переданы некорректные данные'));
       }
-      return next(new ServerError('Произошла ошибка на сервере'));
+      return next(err);
     });
 };
 const deleteCardById = (req, res, next) => {

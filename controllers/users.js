@@ -5,7 +5,6 @@ const {
   ValidationError,
   ConflictError,
   NotFoundError,
-  ServerError,
 } = require('../utils/errors');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
@@ -53,11 +52,10 @@ const createUser = (req, res, next) => {
     .catch((err) => {
       if (err.code === 11000) {
         return next(new ConflictError('Указанный email уже существует'));
-      }
-      if (err.name === 'ValidationError') {
+      } if (err.name === 'ValidationError') {
         return next(new ValidationError('Переданы некорректные данные'));
       }
-      return next(new ServerError('Произошла ошибка на сервере'));
+      return next(err);
     });
 };
 
@@ -74,12 +72,7 @@ const updateUserById = (req, res, next) => {
       }
       return res.send(user);
     })
-    .catch((err) => {
-      if (err.message === 'NotFoundError') {
-        return next(new NotFoundError('Пользователь не найден'));
-      }
-      return next(new ServerError('Произошла ошибка на сервере'));
-    });
+    .catch(next);
 };
 
 const updateUserAvatar = (req, res, next) => {
@@ -95,12 +88,7 @@ const updateUserAvatar = (req, res, next) => {
       }
       return res.send(user);
     })
-    .catch((err) => {
-      if (err.message === 'NotFoundError') {
-        return next(new NotFoundError('Пользователь не найден'));
-      }
-      return next(new ServerError('Произошла ошибка на сервере'));
-    });
+    .catch(next);
 };
 
 const getUserCurrent = (req, res, next) => {
@@ -111,12 +99,7 @@ const getUserCurrent = (req, res, next) => {
       }
       return res.send(user);
     })
-    .catch((err) => {
-      if (err.message === 'NotFoundError') {
-        return next(new NotFoundError('Пользователь не найден'));
-      }
-      return next(new ServerError('Произошла ошибка на сервере'));
-    });
+    .catch(next);
 };
 
 const login = (req, res, next) => {
