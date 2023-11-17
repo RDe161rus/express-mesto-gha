@@ -37,9 +37,6 @@ const deleteCardById = (req, res, next) => {
       });
     })
     .catch((err) => {
-      if (err.message === 'NotFoundError') {
-        return next(new NotFoundError('Пользователь не найден'));
-      }
       if (err.name === 'CastError') {
         return next(new ValidationError('Переданы некорректные данные'));
       }
